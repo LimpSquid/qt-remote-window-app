@@ -1,0 +1,3 @@
+[submodule "dependencies/qt-remote-window-lib"]
+	path = dependencies/qt-remote-window-lib
+	url = https://github.com/LimpSquid/qt-remote-window-lib
