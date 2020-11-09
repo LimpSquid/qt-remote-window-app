@@ -53,7 +53,7 @@ CustomImageProvider::CustomImageProvider(QObject *parent) :
 CustomImageProvider::~CustomImageProvider()
 {
     if(qmlEngine_)
-        qmlEngine_->removeImageProvider(providerId_); // Destroys the private object
+        qmlEngine_->removeImageProvider(providerId_);
 
 }
 
@@ -72,7 +72,7 @@ QByteArray CustomImageProvider::data() const
 void CustomImageProvider::setData(const QByteArray &data)
 {
     if(data_ != data) {
-        id_ = QUuid::createUuid().toByteArray().toBase64(QByteArray::OmitTrailingEquals); // New UUID for triggering the source change in QML side, note that image caching will be broken by this. Acceptable for now
+        id_ = QUuid::createUuid().toByteArray().toBase64(QByteArray::OmitTrailingEquals);
         data_ = data;
 
         emit dataChanged();
