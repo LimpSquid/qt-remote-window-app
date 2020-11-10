@@ -16,6 +16,13 @@ Window {
         Component.onCompleted: { connect() }
     }
 
+    Timer {
+        id: mouseMoveTimer
+        interval: 10
+        repeat: false
+        onTriggered: { remoteWindowSocket.sendMouseMove(mouseArea.mouseX, mouseArea.mouseY) }
+    }
+
     // Visual items
     ScrollView {
         anchors.fill: parent
@@ -25,12 +32,13 @@ Window {
             source: imageProvider.source
 
             MouseArea {
+                id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
                 onPressed: { remoteWindowSocket.sendMousePress(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
                 onReleased: { remoteWindowSocket.sendMouseRelease(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
-                onMouseXChanged: { remoteWindowSocket.sendMouseMove(mouse.x, mouse.y) }
-                onMouseYChanged: { remoteWindowSocket.sendMouseMove(mouse.x, mouse.y) }
+                onMouseXChanged: { mouseMoveTimer.restart() }
+                onMouseYChanged: { mouseMoveTimer.restart() }
             }
         }
     }
