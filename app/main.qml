@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Dialogs 1.1
 import remote.window.app 1.0
 
 ApplicationWindow {
@@ -31,6 +32,7 @@ ApplicationWindow {
         id: remoteWindowSocket
         onWindowCaptureReceived: { imageProvider.data = data }
         onDisconnected: { imageProvider.clearData() }
+        onError: { errorDialog.open() }
     }
 
     Timer {
@@ -41,6 +43,14 @@ ApplicationWindow {
     }
 
     // Visual items
+
+    MessageDialog {
+        id: errorDialog
+        title: "Socket error"
+        text: "A socket error occured"
+        onAccepted: { close() }
+    }
+
     Popup {
         id: popup
         x: parent.width / 2 - width / 2

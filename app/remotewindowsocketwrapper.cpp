@@ -5,7 +5,7 @@
 RemoteWindowSocketWrapper::RemoteWindowSocketWrapper(QObject *parent) :
     RemoteWindowSocket(parent)
 {
-    address_ = "192.168.21.23"; //QHostAddress(QHostAddress::LocalHost).toString();
+    address_ = QHostAddress(QHostAddress::LocalHost).toString();
     port_ = 55555;
 }
 
