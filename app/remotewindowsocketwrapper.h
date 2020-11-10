@@ -22,6 +22,7 @@ public:
     void setPort(unsigned int port);
 
     Q_INVOKABLE void connect();
+    Q_INVOKABLE void disconnect();
     Q_INVOKABLE void sendMousePress(double x, double y, int button, int modifiers);
     Q_INVOKABLE void sendMouseRelease(double x, double y, int button, int modifiers);
     Q_INVOKABLE void sendMouseMove(double x, double y);

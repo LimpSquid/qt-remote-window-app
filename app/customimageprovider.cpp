@@ -80,6 +80,11 @@ void CustomImageProvider::setData(const QByteArray &data)
     }
 }
 
+void CustomImageProvider::clearData()
+{
+    setData(QByteArray());
+}
+
 void CustomImageProvider::classBegin()
 {
     qmlEngine_ = qmlEngine(this);

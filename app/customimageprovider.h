@@ -21,6 +21,7 @@ public:
 
     QByteArray data() const;
     void setData(const QByteArray &data);
+    Q_INVOKABLE void clearData();
 
 private:
     virtual void classBegin() override;

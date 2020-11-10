@@ -5,7 +5,7 @@
 RemoteWindowSocketWrapper::RemoteWindowSocketWrapper(QObject *parent) :
     RemoteWindowSocket(parent)
 {
-    address_ = QHostAddress(QHostAddress::LocalHost).toString();
+    address_ = "192.168.21.23"; //QHostAddress(QHostAddress::LocalHost).toString();
     port_ = 55555;
 }
 
@@ -43,7 +43,14 @@ void RemoteWindowSocketWrapper::setPort(unsigned int port)
 
 void RemoteWindowSocketWrapper::connect()
 {
-    connectToHost(QHostAddress(address_), port_);
+    if(UnconnectedState == state())
+        connectToHost(QHostAddress(address_), port_);
+}
+
+void RemoteWindowSocketWrapper::disconnect()
+{
+    if(ConnectedState == state())
+        disconnectFromHost();
 }
 
 void RemoteWindowSocketWrapper::sendMousePress(double x, double y, int button, int modifiers)

@@ -3,17 +3,34 @@ import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import remote.window.app 1.0
 
-Window {
+ApplicationWindow {
     visible: true
-    width: 1024
-    height: 768
+    width: 800
+    height: 600
+    maximumWidth: Math.max(800, captureWindow.sourceSize.width)
+    maximumHeight: Math.max(600, captureWindow.sourceSize.height)
+    minimumWidth: 400
+    minimumHeight: 300
+    title: "Remote Window Viewer"
+
+    flags: Qt.Dialog
+
+    menuBar: MenuBar {
+        Menu {
+            title: qsTr("Connection")
+            Action { text: qsTr("Edit..."); onTriggered: { popup.open() } }
+            MenuSeparator { }
+            Action { text: qsTr("Connect"); onTriggered: { remoteWindowSocket.connect() } }
+            Action { text: qsTr("Disconnect"); onTriggered: { remoteWindowSocket.disconnect() } }
+        }
+    }
 
     // Non-visual items
     CustomImageProvider { id: imageProvider }
     RemoteWindowSocket {
         id: remoteWindowSocket
         onWindowCaptureReceived: { imageProvider.data = data }
-        Component.onCompleted: { connect() }
+        onDisconnected: { imageProvider.clearData() }
     }
 
     Timer {
@@ -24,6 +41,68 @@ Window {
     }
 
     // Visual items
+    Popup {
+        id: popup
+        x: parent.width / 2 - width / 2
+        y: parent.height / 2 - height / 2
+        width: 400
+        height: 300
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 16
+
+            Column {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 8
+
+                Label {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    text: "IPv4 address:"
+                }
+
+                TextField {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    placeholderText: "Type here..."
+                    text: remoteWindowSocket.address
+                    onTextChanged: { remoteWindowSocket.address = text }
+                }
+            }
+
+            Column {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 8
+
+                Label {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    text: "Port:"
+                }
+
+                TextField {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    placeholderText: "Type here..."
+                    text: remoteWindowSocket.port
+                    onTextChanged: { remoteWindowSocket.port = text }
+                }
+            }
+
+            Button {
+                text: "CLOSE"
+                onClicked: { popup.close() }
+            }
+        }
+    }
+
     ScrollView {
         anchors.fill: parent
 
