@@ -9,14 +9,13 @@ ApplicationWindow {
     width: 800
     height: 600
     maximumWidth: Math.max(800, captureWindow.sourceSize.width)
-    maximumHeight: Math.max(600, captureWindow.sourceSize.height)
+    maximumHeight: Math.max(600, captureWindow.sourceSize.height) + menuBar.height
     minimumWidth: 400
     minimumHeight: 300
-    title: "Remote Window Viewer"
-
     flags: Qt.Dialog
-
+    title: "Remote Window Viewer"
     menuBar: MenuBar {
+        id: menuBar
         Menu {
             title: qsTr("Connection")
             Action { text: qsTr("Edit..."); onTriggered: { popup.open() } }
@@ -43,7 +42,6 @@ ApplicationWindow {
     }
 
     // Visual items
-
     MessageDialog {
         id: errorDialog
         title: "Socket error"
