@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.1
+import Qt.labs.settings 1.0
 import remote.window.app 1.0
 
 ApplicationWindow {
@@ -39,6 +40,11 @@ ApplicationWindow {
         interval: 10
         repeat: false
         onTriggered: { remoteWindowSocket.sendMouseMove(mouseArea.mouseX, mouseArea.mouseY) }
+    }
+
+    Settings {
+        property alias address: remoteWindowSocket.address
+        property alias port: remoteWindowSocket.port
     }
 
     // Visual items

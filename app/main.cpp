@@ -8,6 +8,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
+    app.setOrganizationName("LimpSquid");
+    app.setOrganizationDomain("github.com/LimpSquid/qt-remote-window-app");
+    app.setApplicationName("qt-remote-window-app");
+
     qmlRegisterType<CustomImageProvider>("remote.window.app", 1, 0, "CustomImageProvider");
     qmlRegisterType<RemoteWindowSocketWrapper>("remote.window.app", 1, 0, "RemoteWindowSocket");
 
