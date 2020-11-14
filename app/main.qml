@@ -18,11 +18,18 @@ ApplicationWindow {
     menuBar: MenuBar {
         id: menuBar
         Menu {
-            title: qsTr("Connection")
-            Action { text: qsTr("Edit..."); onTriggered: { popup.open() } }
+            title: "Connection"
+            Action { text: "Edit..."; onTriggered: { connectionEditor.open() } }
             MenuSeparator { }
-            Action { text: qsTr("Connect"); onTriggered: { remoteWindowSocket.connect() } }
-            Action { text: qsTr("Disconnect"); onTriggered: { remoteWindowSocket.disconnect() } }
+            Action { text: "Connect"; onTriggered: { remoteWindowSocket.connect() } }
+            Action { text: "Disconnect"; onTriggered: { remoteWindowSocket.disconnect() } }
+        }
+
+        Menu {
+            title: "Mouse and Keyboard"
+            Action { text: "Edit mouse filter..."; onTriggered: { mouseFilterEditor.open() } }
+            MenuSeparator { }
+            Action { id: keyboardEvents; text: "Keyboard events"; checkable: true; checked: true }
         }
     }
 
@@ -36,8 +43,15 @@ ApplicationWindow {
     }
 
     Timer {
-        id: mouseMoveTimer
-        interval: 10
+        id: mouseMoveRateLimitTimer
+        interval: 67 // 15Hz
+        repeat: false
+        onTriggered: { remoteWindowSocket.sendMouseMove(mouseArea.mouseX, mouseArea.mouseY) }
+    }
+
+    Timer {
+        id: mouseMoveIdleTimer
+        interval: 100
         repeat: false
         onTriggered: { remoteWindowSocket.sendMouseMove(mouseArea.mouseX, mouseArea.mouseY) }
     }
@@ -45,6 +59,8 @@ ApplicationWindow {
     Settings {
         property alias address: remoteWindowSocket.address
         property alias port: remoteWindowSocket.port
+        property alias keyboardEvents: keyboardEvents.checked
+        property alias mouseMoveRateLimit: mouseMoveRateLimitTimer.interval
     }
 
     // Visual items
@@ -56,18 +72,17 @@ ApplicationWindow {
     }
 
     Popup {
-        id: popup
+        id: connectionEditor
         x: parent.width / 2 - width / 2
         y: parent.height / 2 - height / 2
-        width: 400
-        height: 300
+        width: parent.width / 3
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape
 
         Column {
-            anchors.fill: parent
-            anchors.margins: 16
+            anchors.left: parent.left
+            anchors.right: parent.right
             spacing: 16
 
             Column {
@@ -112,8 +127,64 @@ ApplicationWindow {
 
             Button {
                 text: "CLOSE"
-                onClicked: { popup.close() }
+                onClicked: { connectionEditor.close() }
             }
+        }
+    }
+
+    Popup {
+        id: mouseFilterEditor
+        x: parent.width / 2 - width / 2
+        y: parent.height / 2 - height / 2
+        width: parent.width / 3
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 16
+
+            Column {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                spacing: 8
+
+                Label {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    text: "Mouse move rate limit (in ms):"
+                }
+
+                SpinBox {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    from: 10
+                    to: 500
+                    value: mouseMoveRateLimitTimer.interval
+                    onValueChanged: { mouseMoveRateLimitTimer.interval = value }
+                }
+            }
+
+            Button {
+                text: "CLOSE"
+                onClicked: { mouseFilterEditor.close() }
+            }
+        }
+    }
+
+    Item {
+        focus: (remoteWindowSocket.joined && keyboardEvents.checked)
+        anchors.fill: parent
+        Keys.onPressed: {
+            remoteWindowSocket.sendKeyPress(event.key, event.modifiers)
+            event.accepted = true
+        }
+
+        Keys.onReleased: {
+            remoteWindowSocket.sendKeyRelease(event.key, event.modifiers)
+            event.accepted = true
         }
     }
 
@@ -123,6 +194,7 @@ ApplicationWindow {
         Image {
             id: captureWindow
             source: imageProvider.source
+            anchors.fill: parent // @Commit: removedafadf
 
             MouseArea {
                 id: mouseArea
@@ -130,8 +202,8 @@ ApplicationWindow {
                 hoverEnabled: true
                 onPressed: { remoteWindowSocket.sendMousePress(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
                 onReleased: { remoteWindowSocket.sendMouseRelease(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
-                onMouseXChanged: { mouseMoveTimer.restart() }
-                onMouseYChanged: { mouseMoveTimer.restart() }
+                onMouseXChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
+                onMouseYChanged: { mouseMoveRateLimitTimer.start(); mouseMoveRateLimitTimer.restart() }
             }
         }
     }

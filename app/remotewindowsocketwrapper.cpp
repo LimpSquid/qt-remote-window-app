@@ -7,6 +7,8 @@ RemoteWindowSocketWrapper::RemoteWindowSocketWrapper(QObject *parent) :
 {
     address_ = QHostAddress(QHostAddress::LocalHost).toString();
     port_ = 55555;
+
+    QObject::connect(this, &RemoteWindowSocket::sessionStateChanged, this, &RemoteWindowSocketWrapper::onSessionStateChanged);
 }
 
 RemoteWindowSocketWrapper::~RemoteWindowSocketWrapper()
@@ -41,6 +43,11 @@ void RemoteWindowSocketWrapper::setPort(unsigned int port)
     }
 }
 
+bool RemoteWindowSocketWrapper::joined() const
+{
+    return (RemoteWindowSocket::SS_JOINED == sessionState());
+}
+
 void RemoteWindowSocketWrapper::connect()
 {
     if(UnconnectedState == state())
@@ -55,15 +62,30 @@ void RemoteWindowSocketWrapper::disconnect()
 
 void RemoteWindowSocketWrapper::sendMousePress(double x, double y, int button, int modifiers)
 {
-    RemoteWindowSocket::sendMousePress(Qt::MouseButton(button), QPoint(x, y), Qt::KeyboardModifier(modifiers));
+    RemoteWindowSocket::sendMousePress(static_cast<Qt::MouseButton>(button), QPoint(x, y), static_cast<Qt::KeyboardModifier>(modifiers));
 }
 
 void RemoteWindowSocketWrapper::sendMouseRelease(double x, double y, int button, int modifiers)
 {
-    RemoteWindowSocket::sendMouseRelease(Qt::MouseButton(button), QPoint(x, y), Qt::KeyboardModifier(modifiers));
+    RemoteWindowSocket::sendMouseRelease(static_cast<Qt::MouseButton>(button), QPoint(x, y), static_cast<Qt::KeyboardModifier>(modifiers));
 }
 
 void RemoteWindowSocketWrapper::sendMouseMove(double x, double y)
 {
     RemoteWindowSocket::sendMouseMove(QPoint(x, y));
+}
+
+void RemoteWindowSocketWrapper::sendKeyPress(int key, int modifiers)
+{
+    RemoteWindowSocket::sendKeyPress(static_cast<Qt::Key>(key), static_cast<Qt::KeyboardModifier>(modifiers));
+}
+
+void RemoteWindowSocketWrapper::sendKeyRelease(int key, int modifiers)
+{
+    RemoteWindowSocket::sendKeyRelease(static_cast<Qt::Key>(key), static_cast<Qt::KeyboardModifier>(modifiers));
+}
+
+void RemoteWindowSocketWrapper::onSessionStateChanged()
+{
+    emit joinedChanged();
 }
