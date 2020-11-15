@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         customimageprovider.cpp \
         main.cpp \
+        ping.cpp \
         remotewindowsocketwrapper.cpp
 
 RESOURCES += qml.qrc
@@ -46,4 +47,5 @@ else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../dependencies/qt-remote-window-li
 
 HEADERS += \
     customimageprovider.h \
+    ping.h \
     remotewindowsocketwrapper.h

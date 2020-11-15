@@ -34,9 +34,11 @@ ApplicationWindow {
     }
 
     // Non-visual items
+    Ping { id: ping }
     CustomImageProvider { id: imageProvider }
     RemoteWindowSocket {
         id: remoteWindowSocket
+        onAddressChanged: { ping.stop(); pingTimer.restart() }
         onWindowCaptureReceived: { imageProvider.data = data }
         onDisconnected: { imageProvider.clearData() }
         onError: { errorDialog.open() }
@@ -54,6 +56,15 @@ ApplicationWindow {
         interval: 100
         repeat: false
         onTriggered: { remoteWindowSocket.sendMouseMove(mouseArea.mouseX, mouseArea.mouseY) }
+    }
+
+    Timer {
+        id: pingTimer
+        interval: 5000
+        repeat: true
+        running: !remoteWindowSocket.isJoined
+        triggeredOnStart: true
+        onTriggered: { ping.start(remoteWindowSocket.address) }
     }
 
     Settings {
@@ -193,6 +204,7 @@ ApplicationWindow {
     Image {
         id: captureWindow
         source: imageProvider.source
+        visible: remoteWindowSocket.isJoined
 
         MouseArea {
             id: mouseArea
@@ -202,6 +214,35 @@ ApplicationWindow {
             onReleased: { remoteWindowSocket.sendMouseRelease(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
             onMouseXChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
             onMouseYChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: !remoteWindowSocket.isJoined
+        color: "lightsteelblue"
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            Label {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                horizontalAlignment: Label.AlignHCenter
+                font.pointSize: 18
+                text: "Host at '" + remoteWindowSocket.address + "' online:"
+            }
+
+            Label {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                horizontalAlignment: Label.AlignHCenter
+                font.pointSize: 18
+                text: ping.success ? "yes" : "no"
+                color: ping.success ? "green" : "red"
+            }
         }
     }
 }

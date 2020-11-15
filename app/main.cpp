@@ -1,5 +1,6 @@
 #include "customimageprovider.h"
 #include "remotewindowsocketwrapper.h"
+#include "ping.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
@@ -14,6 +15,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<CustomImageProvider>("remote.window.app", 1, 0, "CustomImageProvider");
     qmlRegisterType<RemoteWindowSocketWrapper>("remote.window.app", 1, 0, "RemoteWindowSocket");
+    qmlRegisterType<Ping>("remote.window.app", 1, 0, "Ping");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
