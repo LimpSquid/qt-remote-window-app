@@ -21,15 +21,15 @@ ApplicationWindow {
             title: "Connection"
             Action { text: "Edit..."; onTriggered: { connectionEditor.open() } }
             MenuSeparator { }
-            Action { text: "Connect"; onTriggered: { remoteWindowSocket.connect() } }
-            Action { text: "Disconnect"; onTriggered: { remoteWindowSocket.disconnect() } }
+            Action { text: "Connect"; enabled: !remoteWindowSocket.isConnected; onTriggered: { remoteWindowSocket.connect() } }
+            Action { text: "Disconnect"; enabled: remoteWindowSocket.isConnected; onTriggered: { remoteWindowSocket.disconnect() } }
         }
 
         Menu {
             title: "Mouse and Keyboard"
             Action { text: "Edit mouse filter..."; onTriggered: { mouseFilterEditor.open() } }
             MenuSeparator { }
-            Action { id: keyboardEvents; text: "Keyboard events"; checkable: true; checked: true }
+            Action { id: keyboardIntegration; text: "Keyboard integration"; checkable: true; checked: true }
         }
     }
 
@@ -59,7 +59,7 @@ ApplicationWindow {
     Settings {
         property alias address: remoteWindowSocket.address
         property alias port: remoteWindowSocket.port
-        property alias keyboardEvents: keyboardEvents.checked
+        property alias keyboardIntegration: keyboardIntegration.checked
         property alias mouseMoveRateLimit: mouseMoveRateLimitTimer.interval
     }
 
@@ -160,6 +160,7 @@ ApplicationWindow {
                 SpinBox {
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    editable: true
                     from: 10
                     to: 500
                     value: mouseMoveRateLimitTimer.interval
@@ -175,7 +176,8 @@ ApplicationWindow {
     }
 
     Item {
-        focus: (remoteWindowSocket.joined && keyboardEvents.checked)
+        focus: (remoteWindowSocket.isJoined && keyboardIntegration.checked &&
+                !connectionEditor.visible && !mouseFilterEditor.visible)
         anchors.fill: parent
         Keys.onPressed: {
             remoteWindowSocket.sendKeyPress(event.key, event.modifiers)
@@ -188,23 +190,18 @@ ApplicationWindow {
         }
     }
 
-    ScrollView {
-        anchors.fill: parent
+    Image {
+        id: captureWindow
+        source: imageProvider.source
 
-        Image {
-            id: captureWindow
-            source: imageProvider.source
-            anchors.fill: parent // @Commit: removedafadf
-
-            MouseArea {
-                id: mouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onPressed: { remoteWindowSocket.sendMousePress(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
-                onReleased: { remoteWindowSocket.sendMouseRelease(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
-                onMouseXChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
-                onMouseYChanged: { mouseMoveRateLimitTimer.start(); mouseMoveRateLimitTimer.restart() }
-            }
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onPressed: { remoteWindowSocket.sendMousePress(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
+            onReleased: { remoteWindowSocket.sendMouseRelease(mouse.x, mouse.y, mouse.button, mouse.modifiers) }
+            onMouseXChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
+            onMouseYChanged: { mouseMoveRateLimitTimer.start(); mouseMoveIdleTimer.restart() }
         }
     }
 }

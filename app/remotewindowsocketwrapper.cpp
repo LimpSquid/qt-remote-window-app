@@ -8,6 +8,8 @@ RemoteWindowSocketWrapper::RemoteWindowSocketWrapper(QObject *parent) :
     address_ = QHostAddress(QHostAddress::LocalHost).toString();
     port_ = 55555;
 
+    QObject::connect(this, &RemoteWindowSocket::connected, this, &RemoteWindowSocketWrapper::onConnected);
+    QObject::connect(this, &RemoteWindowSocket::disconnected, this, &RemoteWindowSocketWrapper::onDisconnected);
     QObject::connect(this, &RemoteWindowSocket::sessionStateChanged, this, &RemoteWindowSocketWrapper::onSessionStateChanged);
 }
 
@@ -43,7 +45,12 @@ void RemoteWindowSocketWrapper::setPort(unsigned int port)
     }
 }
 
-bool RemoteWindowSocketWrapper::joined() const
+bool RemoteWindowSocketWrapper::isConnected() const
+{
+    return (RemoteWindowSocket::ConnectedState == state());
+}
+
+bool RemoteWindowSocketWrapper::isJoined() const
 {
     return (RemoteWindowSocket::SS_JOINED == sessionState());
 }
@@ -85,7 +92,17 @@ void RemoteWindowSocketWrapper::sendKeyRelease(int key, int modifiers)
     RemoteWindowSocket::sendKeyRelease(static_cast<Qt::Key>(key), static_cast<Qt::KeyboardModifier>(modifiers));
 }
 
+void RemoteWindowSocketWrapper::onConnected()
+{
+    emit isConnectedChanged();
+}
+
+void RemoteWindowSocketWrapper::onDisconnected()
+{
+    emit isConnectedChanged();
+}
+
 void RemoteWindowSocketWrapper::onSessionStateChanged()
 {
-    emit joinedChanged();
+    emit isJoinedChanged();
 }

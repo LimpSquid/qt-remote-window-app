@@ -9,7 +9,8 @@ class RemoteWindowSocketWrapper : public RemoteWindowSocket
 
     Q_PROPERTY(QString address READ address WRITE setAddress NOTIFY addressChanged)
     Q_PROPERTY(unsigned int port READ port WRITE setPort NOTIFY portChanged)
-    Q_PROPERTY(bool joined READ joined NOTIFY joinedChanged)
+    Q_PROPERTY(bool isConnected READ isConnected NOTIFY isConnectedChanged)
+    Q_PROPERTY(bool isJoined READ isJoined NOTIFY isJoinedChanged)
 
 public:
     RemoteWindowSocketWrapper(QObject *parent = nullptr);
@@ -21,7 +22,8 @@ public:
     unsigned int port() const;
     void setPort(unsigned int port);
 
-    bool joined() const;
+    bool isConnected() const;
+    bool isJoined() const;
 
     Q_INVOKABLE void connect();
     Q_INVOKABLE void disconnect();
@@ -38,8 +40,11 @@ private:
 signals:
     void addressChanged();
     void portChanged();
-    void joinedChanged();
+    void isConnectedChanged();
+    void isJoinedChanged();
 
 private slots:
+    void onConnected();
+    void onDisconnected();
     void onSessionStateChanged();
 };
