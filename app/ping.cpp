@@ -17,7 +17,7 @@ Ping::Ping(QObject *parent) :
 
 Ping::~Ping()
 {
-
+    stop();
 }
 
 bool Ping::success() const
