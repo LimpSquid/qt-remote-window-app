@@ -7,8 +7,10 @@ import remote.window.app 1.0
 
 ApplicationWindow {
     visible: true
-    width: 800
-    height: 600
+    width: (autoScreenResize.checked && remoteWindowSocket.isJoined) ?
+                Math.max(minimumWidth, captureWindow.sourceSize.width) : 800
+    height: (autoScreenResize.checked && remoteWindowSocket.isJoined) ?
+                Math.max(minimumHeight, captureWindow.sourceSize.height +  menuBar.height) : 600
     maximumWidth: Math.max(800, captureWindow.sourceSize.width)
     maximumHeight: Math.max(600, captureWindow.sourceSize.height) + menuBar.height
     minimumWidth: 400
@@ -18,7 +20,7 @@ ApplicationWindow {
     menuBar: MenuBar {
         id: menuBar
         Menu {
-            title: "Connection"
+            title: "&Connection"
             Action { text: "Edit..."; onTriggered: { connectionEditor.open() } }
             MenuSeparator { }
             Action { text: "Connect"; enabled: !remoteWindowSocket.isConnected; onTriggered: { remoteWindowSocket.connect() } }
@@ -26,10 +28,12 @@ ApplicationWindow {
         }
 
         Menu {
-            title: "Mouse and Keyboard"
-            Action { text: "Edit mouse filter..."; onTriggered: { mouseFilterEditor.open() } }
-            MenuSeparator { }
+            title: "&Other settings"
+            Action { text: "Edit mouse filter(s)..."; onTriggered: { mouseFilterEditor.open() } }
             Action { id: keyboardIntegration; text: "Keyboard integration"; checkable: true; checked: true }
+            MenuSeparator { }
+            Action { id: autoScreenResize; text: "Automatic screen resize"; checkable: true; checked: true }
+
         }
     }
 
@@ -72,6 +76,7 @@ ApplicationWindow {
         property alias port: remoteWindowSocket.port
         property alias keyboardIntegration: keyboardIntegration.checked
         property alias mouseMoveRateLimit: mouseMoveRateLimitTimer.interval
+        property alias autoScreenResize: autoScreenResize.checked
     }
 
     // Visual items
