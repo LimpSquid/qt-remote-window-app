@@ -10,6 +10,7 @@ RemoteWindowSocketWrapper::RemoteWindowSocketWrapper(QObject *parent) :
 
     QObject::connect(this, &QAbstractSocket::stateChanged, this, &RemoteWindowSocketWrapper::onStateChanged);
     QObject::connect(this, &RemoteWindowSocket::sessionStateChanged, this, &RemoteWindowSocketWrapper::onSessionStateChanged);
+    QObject::connect(this, &RemoteWindowSocket::sessionStateChanged, this, &RemoteWindowSocketWrapper::onSessionStateChanged);
 }
 
 RemoteWindowSocketWrapper::~RemoteWindowSocketWrapper()
@@ -94,6 +95,11 @@ void RemoteWindowSocketWrapper::sendKeyPress(int key, int modifiers)
 void RemoteWindowSocketWrapper::sendKeyRelease(int key, int modifiers)
 {
     RemoteWindowSocket::sendKeyRelease(static_cast<Qt::Key>(key), static_cast<Qt::KeyboardModifier>(modifiers));
+}
+
+void RemoteWindowSocketWrapper::sendChatMessage(const QString &msg)
+{
+    RemoteWindowSocket::sendChatMessage(msg);
 }
 
 void RemoteWindowSocketWrapper::onStateChanged(const QAbstractSocket::SocketState &state)

@@ -34,6 +34,7 @@ public:
     Q_INVOKABLE void sendMouseMove(double x, double y);
     Q_INVOKABLE void sendKeyPress(int key, int modifiers);
     Q_INVOKABLE void sendKeyRelease(int key, int modifiers);
+    Q_INVOKABLE void sendChatMessage(const QString &msg);
 
 private:
     QString address_;

@@ -35,10 +35,16 @@ ApplicationWindow {
             Action { id: autoScreenResize; text: "Automatic screen resize"; checkable: true; checked: true }
 
         }
+
+        Menu {
+            title: "&Chat"
+            Action { text: "Show chatbox..."; enabled: socket.isConnected; onTriggered: { chatBoxDialog.open() } }
+        }
     }
 
     // Non-visual items
     Ping { id: ping }
+    ListModel { id: chatBoxModel }
     CustomImageProvider { id: imageProvider }
     RemoteWindowSocket {
         id: socket
@@ -46,6 +52,7 @@ ApplicationWindow {
         onWindowCaptureReceived: { imageProvider.data = data }
         onDisconnected: { imageProvider.clearData() }
         onError: { errorDialog.open() }
+        onChatMessageReceived: { chatBoxModel.append({ msg }) }
     }
 
     Timer {
@@ -146,6 +153,44 @@ ApplicationWindow {
             Button {
                 text: "CLOSE"
                 onClicked: { connectionEditor.close() }
+            }
+        }
+    }
+
+    MessageDialog {
+        id: chatBoxDialog
+        modality: Qt.NonModal
+
+        Item {
+            anchors.fill: parent
+            implicitWidth: 400
+            implicitHeight: 300
+
+            ListView {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: chatMessage.top
+                anchors.margins: 8
+                model: chatBoxModel
+                delegate: Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    text: modelData
+                }
+            }
+
+            TextField {
+                id: chatMessage
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                placeholderText: "Type here..."
+                Keys.onReturnPressed: {
+                    socket.sendChatMessage(chatMessage.text)
+                    chatMessage.text = ""
+                }
             }
         }
     }
