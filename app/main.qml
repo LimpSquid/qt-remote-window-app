@@ -44,7 +44,7 @@ ApplicationWindow {
 
     // Non-visual items
     Ping { id: ping }
-    ListModel { id: chatBoxModel }
+    ListModel { id: chatBoxModel; onCountChanged: { if(count > 500) remove(0, 20) } }
     CustomImageProvider { id: imageProvider }
     RemoteWindowSocket {
         id: socket
@@ -159,6 +159,7 @@ ApplicationWindow {
 
     MessageDialog {
         id: chatBoxDialog
+        title: "Chatbox"
         modality: Qt.NonModal
 
         Item {
@@ -171,8 +172,9 @@ ApplicationWindow {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: chatMessage.top
-                anchors.margins: 8
+                anchors.margins: 16
                 model: chatBoxModel
+                onCountChanged: { positionViewAtEnd() }
                 delegate: Text {
                     anchors.left: parent.left
                     anchors.right: parent.right
