@@ -22,9 +22,11 @@ ApplicationWindow {
         Menu {
             title: "&Connection"
             Action { text: "Edit..."; onTriggered: { connectionEditor.open() } }
+            Action { id: autoConnect; text: "Auto connect"; checkable: true; checked: false }
             MenuSeparator { }
             Action { text: "Connect"; enabled: (!socket.isConnected && !socket.isConnecting); onTriggered: { socket.connect() } }
-            Action { text: "Disconnect"; enabled: socket.isConnected; onTriggered: { socket.disconnect() } }
+            Action { text: "Disconnect"; enabled: socket.isConnected || socket.isConnecting; onTriggered: { socket.isConnected ? socket.disconnect() :
+                                                                                                                                 socket.cancelConnect() } }
         }
 
         Menu {
@@ -49,9 +51,9 @@ ApplicationWindow {
     RemoteWindowSocket {
         id: socket
         onAddressChanged: { ping.stop(); pingTimer.restart() }
+        onPortChanged: { ping.stop(); pingTimer.restart() }
         onWindowCaptureReceived: { imageProvider.data = data }
         onDisconnected: { imageProvider.clearData() }
-        onError: { errorDialog.open() }
         onChatMessageReceived: { chatBoxModel.append({ msg }) }
     }
 
@@ -78,22 +80,24 @@ ApplicationWindow {
         onTriggered: { ping.start(socket.address) }
     }
 
+    Timer {
+        id: autoConnectTimer
+        interval: 1000
+        repeat: true
+        running: !socket.isConnected && !socket.isConnecting && ping.success && autoConnect.checked
+        onTriggered: { socket.connect() }
+    }
+
     Settings {
         property alias address: socket.address
         property alias port: socket.port
+        property alias autoConnect: autoConnect.checked
         property alias keyboardIntegration: keyboardIntegration.checked
         property alias mouseMoveRateLimit: mouseMoveRateLimitTimer.interval
         property alias autoScreenResize: autoScreenResize.checked
     }
 
     // Visual items
-    MessageDialog {
-        id: errorDialog
-        title: "Socket error"
-        text: "A socket error occured"
-        onAccepted: { close() }
-    }
-
     Popup {
         id: connectionEditor
         x: parent.width / 2 - width / 2

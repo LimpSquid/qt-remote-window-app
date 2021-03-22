@@ -49,7 +49,7 @@ bool Ping::start(const QString &address)
 
 void Ping::stop()
 {
-    if(process_.state() != QProcess::Running)
+    if(process_.state() == QProcess::NotRunning)
         return;
     process_.terminate();
     process_.kill();

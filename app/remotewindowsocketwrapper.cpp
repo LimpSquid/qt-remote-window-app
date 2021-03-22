@@ -72,6 +72,12 @@ void RemoteWindowSocketWrapper::disconnect()
         disconnectFromHost();
 }
 
+void RemoteWindowSocketWrapper::cancelConnect()
+{
+    if(ConnectingState == state())
+        abort();
+}
+
 void RemoteWindowSocketWrapper::sendMousePress(double x, double y, int button, int modifiers)
 {
     RemoteWindowSocket::sendMousePress(static_cast<Qt::MouseButton>(button), QPoint(x, y), static_cast<Qt::KeyboardModifier>(modifiers));
